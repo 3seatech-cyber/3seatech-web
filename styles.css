@@ -6,3 +6,10 @@
 .ai-head small.remote-state{display:block}.ai-head small.remote-state.offline{color:#ffcf66}
 @media(max-width:1050px){.brand img{width:260px;max-width:34vw}.topbar{min-height:96px}}
 @media(max-width:700px){.brand img{width:205px;height:72px;max-width:58vw}.topbar{min-height:84px}.cards img{height:225px}}
+/* v13 — SEATECH AI robot identity */
+.ai-avatar{position:relative;overflow:visible;background:linear-gradient(145deg,#8ecae6,#219ebc);box-shadow:0 0 0 3px rgba(255,255,255,.12)}
+.robot-head{width:27px;height:21px;border:2px solid #fff;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:5px;position:relative;background:#023047}
+.robot-head:before{content:"";position:absolute;top:-7px;left:50%;width:2px;height:6px;background:#fff;transform:translateX(-50%)}
+.robot-head:after{content:"";position:absolute;top:-10px;left:50%;width:5px;height:5px;border-radius:50%;background:#ffb703;transform:translateX(-50%)}
+.robot-head i{width:5px;height:5px;border-radius:50%;background:#8ecae6;box-shadow:0 0 5px #8ecae6}
+.ai-launcher span:first-child{font-size:0}.ai-launcher span:first-child:before{content:"🤖";font-size:18px}
