@@ -1,33 +1,73 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#031525">
-  <meta name="description" content="3.SEATECH — Robótica, inteligencia artificial y sistemas autónomos para el entorno marino.">
-  <title>3.SEATECH | Autonomous Ocean Systems</title><link rel="stylesheet" href="styles.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#023047">
+<meta name="description" content="SEATECH Innovation & Technology — ingeniería, robótica, inteligencia artificial y sistemas autónomos.">
+<title>SEATECH | Innovation & Technology</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="#inicio"><span class="mark">≋</span><span><b>3.SEATECH</b><small>OCEAN INTELLIGENCE FOR A BETTER TOMORROW</small></span></a>
-  <button class="menu" id="menuBtn">☰</button>
-  <nav id="nav"><a href="#inicio">Inicio</a><a href="#soluciones">Soluciones</a><a href="#tecnologia">Tecnología</a><a href="projects.html">Proyectos</a><a href="#tienda">Tienda</a><a href="#id">I+D</a><a href="#nosotros">Nosotros</a><a href="#contacto">Contacto</a></nav>
-  <a class="btn outline desktop" href="#contacto">Portal de clientes</a>
+  <a class="brand" href="#inicio" aria-label="SEATECH">
+    <span class="brand-symbol"><i></i><i></i></span>
+    <span class="brand-copy"><b>seatech</b><small>INNOVATION & TECHNOLOGY</small></span>
+  </a>
+  <button class="menu" id="menuBtn" aria-label="Abrir menú">☰</button>
+  <nav id="nav">
+    <a href="#inicio">Inicio</a><a href="#nosotros">Nosotros</a><a href="projects.html">Proyectos</a>
+    <a href="#soluciones">Soluciones</a><a href="#id">I+D</a><a href="#contacto">Contacto</a>
+  </nav>
+  <a class="btn primary desktop" href="#contacto">Contáctanos →</a>
 </header>
+
 <main>
-<section class="hero" id="inicio"><div class="overlay"></div><div class="hero-content">
-<p class="eyebrow">OCÉANOS MÁS INTELIGENTES, UN FUTURO MÁS SEGURO</p><h1>Engineering the<br>Autonomous Ocean</h1>
-<p class="lead">Robótica, inteligencia artificial y sistemas autónomos para explorar, monitorear y transformar el entorno marino.</p>
-<div class="actions"><a class="btn primary" href="#tecnologia">Explorar tecnología →</a><a class="btn glass" href="projects.html">Conocer nuestros proyectos</a></div></div></section>
-<section class="solutions" id="soluciones">
-<article><span>◒</span><h3>Sistemas Autónomos USV</h3><p>Plataformas no tripuladas para batimetría, inspección y monitoreo.</p></article>
-<article><span>✣</span><h3>Drones & Robótica</h3><p>Inspección, mapeo y operaciones aéreas y submarinas.</p></article>
-<article><span>◉</span><h3>IA & Digital Twins</h3><p>Modelado, simulación y análisis inteligente del entorno marino.</p></article>
-<article><span>▥</span><h3>Ocean Data & Monitoring</h3><p>Datos en tiempo real para un océano más sostenible.</p></article></section>
-<section class="metrics" id="tecnologia"><div><strong>24/7</strong><span>Monitoreo autónomo</span></div><div><strong>AI</strong><span>Decisiones en tiempo real</span></div><div><strong>USV + UAV</strong><span>Operación multimodal</span></div><div><strong>R&D</strong><span>Innovación continua</span></div></section>
-<section class="projects section" id="proyectos"><div class="intro"><p class="eyebrow">NUESTROS PRODUCTOS Y PROYECTOS</p><h2>Tecnología real para un océano mejor</h2><p>Integramos robótica, inteligencia artificial y ciencia de datos para monitoreo, exploración, seguridad e investigación marina.</p></div>
-<div class="cards"><article><div class="thumb usv"></div><h3>USV Trimarán</h3><p>Monitoreo, batimetría y exploración autónoma.</p></article><article><div class="thumb drone"></div><h3>Drone de inspección</h3><p>Imágenes aéreas, automatización y análisis con IA.</p></article><article><div class="thumb twin"></div><h3>Gemelo digital del océano</h3><p>Simulación, análisis, predicción y visualización operacional.</p></article></div><div style="margin-top:28px"><a class="btn primary" href="projects.html">Ver portafolio completo →</a></div></section>
-<section class="commerce section" id="tienda"><div><p class="eyebrow">3.SEATECH STORE</p><h2>Productos, componentes y soluciones</h2><p>Preparada para integrar catálogo, carrito, pagos y gestión de pedidos mediante un backend privado.</p></div><a class="btn primary" href="#contacto">Solicitar información →</a></section>
-<section class="rd section" id="id"><p class="eyebrow">INVESTIGACIÓN + DESARROLLO</p><h2>Del laboratorio al entorno real</h2><div class="pillrow"><span>USV</span><span>UAV</span><span>Visión IA</span><span>Digital Twins</span><span>Ocean Data</span><span>Autonomía</span></div></section>
-<section class="about section" id="nosotros"><p class="eyebrow">3.SEATECH</p><h2>Ingeniería para sistemas marinos inteligentes</h2><p>Diseñamos plataformas autónomas, sistemas de percepción, software de control y análisis para investigación, industria, puertos, costas, medio ambiente y seguridad marítima.</p></section>
-<section class="contact section" id="contacto"><div><p class="eyebrow">CONTACTO</p><h2>Construyamos el próximo sistema autónomo</h2><p>Preparado para conectarse con correo, CRM o API privada.</p></div><form id="contactForm"><input required placeholder="Nombre"><input required type="email" placeholder="Correo"><textarea required placeholder="Cuéntenos sobre su proyecto"></textarea><button class="btn primary" type="submit">Enviar consulta</button><small id="formMsg"></small></form></section>
-</main><footer><b>3.SEATECH</b><span>Autonomous Ocean Systems</span><span>© <span id="year"></span> 3.SEATECH</span></footer><script src="app.js"></script></body></html>
+<section class="hero" id="inicio">
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <p class="eyebrow">OCEAN · TECHNOLOGY · PEOPLE · IMPACT</p>
+    <h1>Ingeniería para un futuro <em>más inteligente y sostenible</em></h1>
+    <p class="lead">Desarrollamos soluciones tecnológicas para el océano, la industria y la sociedad, integrando robótica, inteligencia artificial e ingeniería avanzada.</p>
+    <div class="actions"><a class="btn primary" href="projects.html">Explorar proyectos →</a><a class="btn secondary" href="#soluciones">Nuestras soluciones</a></div>
+  </div>
+  <div class="hero-visual" aria-hidden="true">
+    <div class="radar"></div><div class="vessel"><span>SEATECH</span></div>
+    <div class="data-card"><b>SISTEMAS AUTÓNOMOS</b><small>USV · UAV · AI</small><strong>ONLINE</strong></div>
+  </div>
+</section>
+
+<section class="capabilities" id="soluciones">
+  <article><span>≈</span><div><h3>Tecnologías oceánicas</h3><p>Sistemas autónomos para exploración y monitoreo ambiental.</p></div></article>
+  <article><span>⚙</span><div><h3>Soluciones industriales</h3><p>Robótica, automatización y procesos inteligentes.</p></div></article>
+  <article><span>◒</span><div><h3>Innovación sostenible</h3><p>Tecnología para un planeta más limpio y resiliente.</p></div></article>
+  <article><span>⌁</span><div><h3>Investigación + desarrollo</h3><p>De las ideas al impacto tecnológico real.</p></div></article>
+</section>
+
+<section class="section projects" id="proyectos">
+  <div class="section-head"><div><p class="eyebrow dark">PROYECTOS DESTACADOS</p><h2>Soluciones para desafíos reales</h2></div><a href="projects.html">Ver todos los proyectos →</a></div>
+  <div class="cards">
+    <article><div class="project-img ocean"><span>USV</span></div><h3>Sistemas autónomos</h3><p>USV, UAV, ROV y plataformas robóticas para operación y exploración.</p></article>
+    <article><div class="project-img robot"><span>ROBOTICS</span></div><h3>Robótica avanzada</h3><p>Automatización, control y sistemas inteligentes para industria.</p></article>
+    <article><div class="project-img env"><span>ENVIRONMENT</span></div><h3>Monitoreo ambiental</h3><p>Datos, sensores y analítica para un futuro sostenible.</p></article>
+    <article><div class="project-img ai"><span>AI</span></div><h3>Inteligencia artificial</h3><p>Modelos, agentes y gemelos digitales para decisiones de alto valor.</p></article>
+  </div>
+</section>
+
+<section class="impact" id="id">
+  <div><strong>50+</strong><span>Proyectos desarrollados</span></div><div><strong>8</strong><span>Áreas de investigación</span></div>
+  <div><strong>20+</strong><span>Desarrollos científicos</span></div><div><strong>15+</strong><span>Alianzas y colaboraciones</span></div>
+</section>
+
+<section class="section about" id="nosotros">
+  <div><p class="eyebrow dark">ACERCA DE SEATECH</p><h2>Innovación que conecta ingeniería, datos y propósito</h2></div>
+  <p>SEATECH desarrolla soluciones de ingeniería que integran tecnologías oceánicas, robótica, inteligencia artificial y sostenibilidad para generar impacto en entornos reales.</p>
+</section>
+
+<section class="section contact" id="contacto">
+  <div><p class="eyebrow">CONTACTO</p><h2>Construyamos la próxima solución tecnológica</h2><p>Conversemos sobre proyectos de ingeniería, sistemas autónomos, IA, investigación y desarrollo.</p></div>
+  <form id="contactForm"><input required placeholder="Nombre"><input required type="email" placeholder="Correo"><textarea required placeholder="Cuéntenos sobre su proyecto"></textarea><button class="btn primary" type="submit">Enviar consulta →</button><small id="formMsg"></small></form>
+</section>
+</main>
+<footer><div class="footer-brand">SEATECH <small>INNOVATION & TECHNOLOGY</small></div><span>© <span id="year"></span> SEATECH</span></footer>
+<script src="app.js"></script>
+</body></html>
