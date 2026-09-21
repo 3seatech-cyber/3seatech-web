@@ -1,133 +1,166 @@
 # 3.SEATECH Web
 
-Sitio corporativo de 3.SEATECH preparado para despliegue continuo desde GitHub y publicación del portal DataAI mediante un subdominio independiente.
+Sitio corporativo de 3.SEATECH. La página principal `3seatech.com` y `www.3seatech.com` permanecen como frontend corporativo estático. DataAI se implementa como una aplicación independiente en el subdominio `data.3seatech.com`.
 
-## Arquitectura v23
-
-```text
-GitHub: 3seatech-cyber/3seatech-web
-              |
-              v
-        3seatech.com
-     Web corporativa principal
-              |
-         enlace DataAI
-              |
-              v
-   data.3seatech.com/portal
-              |
-        HTTPS / ngrok
-              |
-              v
-       Servidor local
-              |
-     FastAPI + WebSync
-              |
-   +----------+-----------+
-   |          |           |
- SQLite   Analítica IA   RAG
-   |          |           |
-Reportes  Autoencoder  Agente IA
-           Forecast
-```
-
-### Dominio principal — `3seatech.com`
-
-El frontend corporativo permanece en este repositorio y puede desplegarse continuamente desde la rama `main`. Es un sitio estático y no requiere comando de build.
-
-El menú principal incluye un acceso a:
+## Arquitectura DataAI
 
 ```text
-https://data.3seatech.com/portal
+3seatech.com / www.3seatech.com
+        |
+        | enlace DataAI (sin modificar el contenido principal)
+        v
+https://data.3seatech.com
+        |
+        v
+Cloudflare Tunnel: 3seatech-dataai
+        |
+        v
+http://localhost:8000
+        |
+        v
+FastAPI en servidor local
+        |
+   +----+---------+-----------+
+   |              |           |
+ SQLite       Knowledge/RAG  Modelos IA
+   |                          |
+ WebSync                 AE / Forecast
+   |
+ WebSocket
+   |
+ Usuarios conectados
 ```
 
-### Subdominio DataAI — `data.3seatech.com`
+Cloudflare Tunnel es el canal de producción. El servidor local no necesita exponer públicamente el puerto 8000.
 
-DataAI se ejecuta en el servidor local de 3.SEATECH. El servidor inicia FastAPI, sincroniza la web corporativa mediante WebSync y publica el servicio mediante un túnel HTTPS de ngrok.
+## Página principal
 
-Rutas principales:
+La web corporativa sigue desplegándose desde este repositorio. DataAI no sustituye ni altera las secciones de Inicio, Nosotros, Proyectos, Soluciones, I+D o Contacto.
 
-| Ruta | Función |
-| --- | --- |
-| `/portal` | Portal público DataAI y registro de reportes |
-| `/dataai` | Alias del portal DataAI |
-| `/login` | Acceso administrativo |
-| `/data-ia` | Dashboard privado |
-| `/site-sync` | Copia sincronizada de la web corporativa |
-| `/api/public/reports` | API de recepción/consulta pública agregada |
-| `/api/public/websync-status` | Estado de sincronización |
-
-### WebSync
-
-El servidor DataAI recupera la versión vigente de `3seatech-web` desde GitHub. De esta manera el sitio sincronizado del servidor puede mantenerse alineado con la web corporativa.
+El único punto de integración previsto es el acceso DataAI, cuyo destino estable es:
 
 ```text
-git push
-   |
-   v
-GitHub / main
-   |
-   +------> despliegue de 3seatech.com
-   |
-   +------> WebSync del servidor
-                |
-                v
-          /site-sync
+https://data.3seatech.com
 ```
 
-### Flujo de reportes
+## Subdominio DataAI
 
-Los reportes ingresados en DataAI siguen el flujo:
+Al entrar a `https://data.3seatech.com`, FastAPI debe comprobar la sesión.
+
+```text
+data.3seatech.com
+       |
+       v
+¿sesión válida?
+   |       |
+   no      sí
+   |       |
+ /login  /dashboard
+```
+
+### Entorno de inicio
+
+La primera pantalla será un login independiente con identidad 3.SEATECH DataAI. Después de autenticarse, el usuario accederá al dashboard según su rol.
+
+Roles previstos:
+
+| Rol | Visualización | Carga de datos | Pronóstico | Administración |
+| --- | --- | --- | --- | --- |
+| Viewer | Sí | No | No | No |
+| Editor | Sí | Sí | Sí | No |
+| Admin | Sí | Sí | Sí | Sí |
+
+### Dashboard
+
+El entorno autenticado incorporará:
+
+- datos WebSync y estado del servidor;
+- visualización en tiempo real;
+- histórico, indicadores y mapas;
+- carga de CSV, XLSX y JSON, con soporte documental controlado;
+- staging y validación antes de consolidar datos;
+- Autoencoder y detección de anomalías;
+- ejecución y consulta de pronósticos;
+- Knowledge/RAG y agente IA;
+- auditoría de cargas y resultados.
+
+## Puente bidireccional
+
+### Ida: navegador al servidor local
 
 ```text
 Usuario
-  |
-  v
-data.3seatech.com/portal
-  |
- HTTPS
-  v
-ngrok
-  |
-  v
-FastAPI local
-  |
-  v
-SQLite
-  |
-  +--> indicadores agregados
-  +--> histórico
-  +--> análisis de anomalías
-  +--> pronósticos
+  -> HTTPS data.3seatech.com
+  -> Cloudflare Tunnel
+  -> FastAPI localhost:8000
+  -> validación / staging
+  -> SQLite / Knowledge
+  -> modelos
 ```
 
-Los reportes públicos son entradas no verificadas. La interfaz pública no debe exponer descripciones sensibles, datos de contacto ni ubicaciones exactas. La validación administrativa debe preceder cualquier uso como dato confirmado.
+Cada carga debe registrar usuario, fecha, fuente, batch_id, checksum, filas recibidas, válidas y rechazadas.
 
-## Configuración del servidor
+### Vuelta: servidor local al navegador
 
-El paquete DataAI v23 utiliza un único iniciador en Windows:
-
-```bat
-INICIAR_3SEATECH_COMPLETO.bat
+```text
+SQLite / modelos / WebSync
+  -> FastAPI
+  -> WebSocket
+  -> Cloudflare Tunnel
+  -> usuarios conectados
 ```
 
-Este proceso actualiza WebSync, inicia FastAPI, inicia ngrok, detecta la URL pública y actualiza el acceso DataAI.
+Cloudflare Tunnel soporta WebSockets, por lo que el dashboard podrá recibir cambios sin recargar manualmente la página.
 
-Para producción, `data.3seatech.com` debe ser un hostname estable. Si se utiliza ngrok, se recomienda un dominio custom/reservado compatible con el plan utilizado; una URL gratuita aleatoria puede cambiar después de reiniciar el túnel.
+## Rutas previstas
 
-## Seguridad
+| Ruta | Acceso | Función |
+| --- | --- | --- |
+| `/` | público | redirección a login o dashboard según sesión |
+| `/login` | público | inicio de sesión |
+| `/dashboard` | autenticado | DataAI |
+| `/health` | técnico | estado mínimo del servicio |
+| `/api/data/upload` | Editor/Admin | carga de nueva data |
+| `/api/forecast/run` | Editor/Admin | ejecución de pronóstico |
+| `/api/websync/status` | autenticado | estado WebSync |
+| `/ws/dataai` | autenticado | actualizaciones en tiempo real |
+| `/admin` | Admin | usuarios, aprobación y auditoría |
 
-No almacene tokens, contraseñas, claves SSH, `NGROK_AUTHTOKEN`, secretos de sesión ni credenciales en este repositorio. Manténgalos en variables de entorno, secretos del proveedor de despliegue o archivos locales excluidos de Git.
+## Cloudflare
 
-Los endpoints administrativos deben permanecer autenticados. Para recepción pública en producción se recomienda añadir rate limiting, CAPTCHA/anti-bot, moderación, copias de seguridad y una política de privacidad.
+Configuración actual prevista:
 
-## Componentes previstos
+```text
+Tunnel: 3seatech-dataai
+Public hostname: data.3seatech.com
+Service: http://localhost:8000
+```
 
-- **www / raíz:** frontend corporativo.
-- **data:** DataAI, WebSync y analítica.
-- **shop:** comercio electrónico futuro.
-- **apps:** aplicaciones.
-- **api:** servicios backend privados cuando sean necesarios.
+`cloudflared` debe ejecutarse en la misma máquina que FastAPI. Cloudflare es el acceso estable de producción. ngrok puede conservarse únicamente como canal alternativo de pruebas y diagnóstico.
+
+## Datos y seguridad
+
+Los datos dinámicos no se almacenan en GitHub. GitHub contiene el frontend corporativo y la documentación/artefactos de despliegue; SQLite, archivos cargados, Knowledge y resultados permanecen en el servidor local.
+
+No almacenar en este repositorio tokens de Cloudflare, contraseñas, claves SSH, secretos de sesión, tokens ngrok ni credenciales.
+
+Las cargas realizadas por usuarios deben pasar por validación. Reportes no verificados no deben incorporarse automáticamente como incidentes confirmados ni alimentar modelos de producción sin aprobación.
+
+## Estado de implementación
+
+- [x] Dominio corporativo existente
+- [x] Subdominio DataAI definido
+- [x] Cloudflare Tunnel creado
+- [x] Ruta `data.3seatech.com -> http://localhost:8000` configurada
+- [ ] FastAPI DataAI iniciado en puerto 8000
+- [ ] Login multiusuario conectado a la base local
+- [ ] Roles Viewer / Editor / Admin
+- [ ] Upload con staging y validación
+- [ ] WebSocket bidireccional
+- [ ] Integración WebSync
+- [ ] Forecast sobre datos aprobados
+- [ ] Auditoría y backups
+- [ ] Pruebas externas y endurecimiento de seguridad
 
 ## Repositorio
 
