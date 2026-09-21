@@ -1,0 +1,1 @@
+window.DATAAI_CONFIG={API_BASE:"https://api-data.3seatech.com"};
