@@ -1,0 +1,38 @@
+(()=>{'use strict';
+const BASE=location.hostname==='127.0.0.1'||location.hostname==='localhost'||location.hostname==='institucional.3seatech.com'?'':'https://institucional.3seatech.com';
+const enc=new TextEncoder(),dec=new TextDecoder(),TTL=7*86400000;
+const dbKey=u=>'inst-v49:'+u.trim().toLowerCase(); // mantiene compatibilidad con copias v49
+let user='',password='',mode='none',records={},meta={},dirty=false,lastWrite=0,saving=null,authToken='',lastCheck=0,accessLog=[];
+window.INST_OFFLINE=false;
+const toB64=a=>btoa(String.fromCharCode(...new Uint8Array(a)));
+const fromB64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function key(pass,salt){const k=await crypto.subtle.importKey('raw',enc.encode(pass),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:350000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function seal(){if(!user||!password||mode!=='online'||!records['/api/dashboard']||!records['/api/me'])return;const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));const k=await key(password,salt);const payload={username:user,records,saved:Date.now(),role:meta.role,accessLog:accessLog.slice(-20)};const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,enc.encode(JSON.stringify(payload)));localStorage.setItem(dbKey(user),JSON.stringify({v:49,salt:toB64(salt),iv:toB64(iv),cipher:toB64(cipher),saved:payload.saved}));lastWrite=Date.now();dirty=false}
+async function open(u,p){let item;try{item=JSON.parse(localStorage.getItem(dbKey(u))||'null')}catch{}if(!item)throw Error('No existe copia cifrada de esta cuenta en este navegador. Ingrese una vez con el servidor disponible.');if(item.v!==49||Date.now()-item.saved>TTL||item.saved>Date.now()+300000)throw Error('La copia offline expiró. Conecte el servidor para renovarla.');try{const k=await key(p,fromB64(item.salt));const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64(item.iv)},k,fromB64(item.cipher));const data=JSON.parse(dec.decode(plain));if(data.username.toLowerCase()!==u.toLowerCase()||!data.records['/api/dashboard']||!data.records['/api/me'])throw Error('Copia incompleta');return data}catch{throw Error('Contraseña incorrecta para esta copia offline, o datos dañados.')}}
+const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json'}});
+function normalize(path){const u=new URL(path,location.href);return u.pathname+u.search}
+async function remote(path,options={}){const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),9000);try{return await fetch(BASE+path,{...options,signal:ctrl.signal,cache:'no-store'})}finally{clearTimeout(timer)}}
+async function apiFetch(path,options={}){const p=normalize(path),method=(options.method||'GET').toUpperCase();if(mode==='offline'){
+ if(method!=='GET')return json({detail:'Modo offline: no se permiten modificaciones'},403);
+ if(p==='/health')return json({status:'offline',service:'institucional'});
+ if(Object.prototype.hasOwnProperty.call(records,p))return json(records[p]);
+ return json({detail:'Este módulo no estaba disponible en la última copia. Sincronice con el servidor.'},503);
+ }
+ if(mode==='none'&&p.startsWith('/api/')&&p!=='/api/login')return json({detail:'Inicie sesión'},401);
+ let res;try{res=await remote(p,options)}catch(e){if(mode==='online'&&method==='GET'&&Object.prototype.hasOwnProperty.call(records,p)){return json(records[p])}throw e}
+ if(mode==='online'&&method==='GET'&&res.ok&&p.startsWith('/api/')){const copy=res.clone();try{const data=await copy.json();records[p]=data;dirty=true;if(p==='/api/me')meta=data;queueSave()}catch{}}
+ return res;
+}
+function queueSave(){if(saving||!dirty)return;saving=Promise.resolve().then(async()=>{await new Promise(r=>setTimeout(r,700));await seal()}).catch(e=>console.warn('No se pudo guardar copia cifrada',e)).finally(()=>{saving=null;if(dirty&&mode==='online')queueSave()})}
+async function login(u,p){user=u;password=p;let response;
+ try{response=await remote('/api/login',{method:'POST',body:new URLSearchParams({username:u,password:p}),headers:{'Content-Type':'application/x-www-form-urlencoded'}})}catch(networkError){const data=await open(u,p);records=data.records;meta=data.records['/api/me'];accessLog=data.accessLog||[];mode='offline';window.INST_OFFLINE=true;accessLog.push({at:new Date().toISOString(),type:'offline'});return {token:'offline-readonly',offline:true,role:'viewer'}}
+ if([502,503,504].includes(response.status)){const data=await open(u,p);records=data.records;meta=data.records['/api/me'];accessLog=data.accessLog||[];mode='offline';window.INST_OFFLINE=true;accessLog.push({at:new Date().toISOString(),type:'offline'});return {token:'offline-readonly',offline:true,role:'viewer'}}
+ if(!response.ok){password='';const msg=response.status===401?'Usuario o contraseña incorrectos en el servidor.':'El servidor respondió HTTP '+response.status+' al iniciar sesión.';throw Error(msg)}
+ const login=await response.json();if(!login.token)throw Error('La API no devolvió token. Compruebe la versión del backend.');authToken=login.token;
+ let me,d;try{const headers={Authorization:'Bearer '+authToken};const mr=await remote('/api/me',{headers});if(!mr.ok)throw Error('/api/me: HTTP '+mr.status);me=await mr.json();if(me.username.toLowerCase()!==u.toLowerCase())throw Error('Identidad no coincide');const dr=await remote('/api/dashboard',{headers});if(!dr.ok)throw Error('/api/dashboard: HTTP '+dr.status);d=await dr.json()}catch(e){try{const cached=await open(u,p);me=cached.records['/api/me'];d=cached.records['/api/dashboard'];if(String(me.username).toLowerCase()!==u.toLowerCase())throw Error('Usuario no coincide')}catch{throw Error('Autenticación aceptada, pero no se pudo cargar el entorno: '+e.message)}}
+ records={'/api/me':me,'/api/dashboard':d};meta=me;mode='online';window.INST_OFFLINE=false;accessLog.push({at:new Date().toISOString(),type:'online'});await seal();return {token:authToken,offline:false,role:me.role};
+}
+async function autoSync(){if(!user||!password||Date.now()-lastCheck<60000)return;lastCheck=Date.now();if(mode==='offline'){try{const result=await login(user,password);if(!result.offline){window.INST_OFFLINE=false;window.dispatchEvent(new Event('inst-reconnected'))} }catch{}return}if(mode!=='online'||!authToken)return;try{const headers={Authorization:'Bearer '+authToken};const r=await remote('/api/dashboard',{headers});if(r.status===401){authToken='';return} if(r.ok){records['/api/dashboard']=await r.json();dirty=true;queueSave();if(typeof window.refresh==='function')await window.refresh()}}catch{ /* keep last encrypted snapshot; no auto-logout */ }}
+function logout(){user='';password='';mode='none';records={};meta={};authToken='';accessLog=[];window.INST_OFFLINE=false}
+window.InstOffline={login,apiFetch,autoSync,logout,lastAccess:()=>accessLog.slice(-20),snapshotDate:()=>lastWrite,currentToken:()=>authToken};
+})();
