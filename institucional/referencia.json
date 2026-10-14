@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "kind": "public_reference",
+  "generated_at": "2026-10-13T00:00:00Z",
+  "description": "Valores de ejemplo, no sincronizados",
+  "dashboard": {
+    "docentes": 20,
+    "requeridas": 600,
+    "asignadas": 420,
+    "cobertura": 70,
+    "detalle": []
+  }
+}
