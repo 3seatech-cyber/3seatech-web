@@ -312,6 +312,6 @@ async function careerUpload(preview){const file=$('careerExcel').files[0];if(!fi
  }catch(e){$('careerImportMessage').textContent=e.message}}
 $('careerPreview').onclick=()=>careerUpload(true);$('careerImport').onclick=()=>careerUpload(false);
 
-})();
 async function reconcileCategories(preview){const msg=$('reconcileMessage');if(!preview&&!await requestApproval('Homologar categorías','¿Asignar las categorías de la normativa aprobada a docentes sin categoría válida? Las categorías fijadas manualmente no cambiarán.'))return;try{const d=await api('/api/categories/reconcile?dry_run='+preview,{method:'POST'});msg.textContent=(preview?'Previsualización: ':'Actualizado: ')+d.asignados+' asignables · '+(d.creaciones_tp_previstas||0)+' tiempo parcial por crear · '+d.ya_asignados+' con categoría válida · '+d.bloqueados+' protegidos · '+d.pendientes+' requieren revisión.';$('reconcileDetails').innerHTML='<table><thead><tr><th>Docente</th><th>Régimen original</th><th>Resultado normativo</th></tr></thead><tbody>'+d.detalle.map(x=>'<tr><td>'+escape(x.docente)+'</td><td>'+escape(x.origen)+'</td><td>'+escape(x.resultado)+'</td></tr>').join('')+'</tbody></table>';if(!preview)await refresh()}catch(e){msg.textContent=e.message}}
 $('reconcilePreview').onclick=()=>reconcileCategories(true);$('reconcileApply').onclick=()=>reconcileCategories(false);
+})();
