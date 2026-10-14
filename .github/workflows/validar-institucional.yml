@@ -1,0 +1,37 @@
+name: Validar cambios de Institucional
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'institucional/**'
+      - '.github/workflows/validar-institucional.yml'
+  pull_request:
+    paths:
+      - 'institucional/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validar-institucional:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v4
+      - name: Verificar integridad del frontend institucional
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s institucional/index.html
+          if grep -q 'offline-bridge.js' institucional/index.html; then
+            test -s institucional/offline-bridge.js
+          fi
+          if grep -q 'app.js' institucional/index.html; then
+            test -s institucional/app.js
+          fi
+          for file in institucional/app.js institucional/offline-bridge.js; do
+            if [ -f "$file" ]; then node --check "$file"; fi
+          done
+          echo "Institucional validado. No se despliega ni modifica ningun otro sitio."
